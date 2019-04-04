@@ -1,0 +1,11 @@
+stages:
+  - build
+
+## build stage
+build:
+  stage: build
+  script:
+      - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASSWORD $DOCKER_HUB_HOST
+      - docker build -t anboo/golang-vk:latest .
+      - docker tag anboo/golang-vk:latest $DOCKER_HUB_HOST/anboo/golang-vk
+      - docker push $DOCKER_HUB_HOST/anboo/golang-vk:latest
