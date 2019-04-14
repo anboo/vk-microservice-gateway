@@ -1,3 +1,8 @@
+# Introdaction
+All requests to the service vk.com will be executed in parallel, depending on how many processors joined the gateway. All processors must be located on different servers or under different ip addresses in order to bypass request blocking once a second. The gateway itself will distribute all necessary requests between handlers through the round-robin algorithm. Each handler will be able to send only 1 message per second, if you have several handlers, then you can already execute 10 requests in 1 second.
+
+If an error occurs in one of the processors, the task is transferred to another processor, and one penalty point is charged to the erroneous processor. If one of the processors has more than 10 errors, it is temporarily disabled.
+
 # Installation
 ```bash
 cp .env.dist .env
