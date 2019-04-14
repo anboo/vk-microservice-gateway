@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -140,8 +140,10 @@ func doRequest(request Request) interface{} {
 
 	var uri strings.Builder
 
-	uri.WriteString("http://")
 	uri.WriteString(executor.Host)
+	if executor.Port != 0 {
+		uri.WriteString(":"+strconv.Itoa(executor.Port))
+	}
 	uri.WriteString("/request")
 
 	start := time.Now()
@@ -229,26 +231,26 @@ func RegisterExecutor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req, err := http.NewRequest("GET", newExecutor.Host + "/_health", nil); if err != nil {
-		handleErrResponse(w, "Internal error", 500, false)
-		return
-	}
+	//req, err := http.NewRequest("GET", newExecutor.Host + "/_health", nil); if err != nil {
+	//	handleErrResponse(w, "Internal error", 500, false)
+	//	return
+	//}
 
-	client := http.Client{}
-	res, err := client.Do(req); if err != nil {
-		handleErrResponse(w, "Health check error: " + err.Error(), 400, false)
-		return
-	}
-
-	body, err := ioutil.ReadAll(res.Body); if err != nil {
-		handleErrResponse(w, "Internal error", 500, false)
-		return
-	}
-
-	if string(body) != "OK" {
-		handleErrResponse(w, "Health check error: response need \"OK\" Your response" + string(body), 400, false)
-		return
-	}
+	//client := http.Client{}
+	//res, err := client.Do(req); if err != nil {
+	//	handleErrResponse(w, "Health check error: " + err.Error(), 400, false)
+	//	return
+	//}
+	//
+	//body, err := ioutil.ReadAll(res.Body); if err != nil {
+	//	handleErrResponse(w, "Internal error", 500, false)
+	//	return
+	//}
+	//
+	//if string(body) != "OK" {
+	//	handleErrResponse(w, "Health check error: response need \"OK\" Your response" + string(body), 400, false)
+	//	return
+	//}
 
 	ExecutorList = append(ExecutorList, newExecutor)
 
@@ -297,12 +299,6 @@ func main() {
 	regHash = fmt.Sprintf("%x", h.Sum([]byte(string(time.Now().Unix()))))
 
 	log.Println("Hash for authorization " + regHash)
-
-	executors := strings.Split(os.Getenv("EXECUTORS"),",")
-	for _, executor := range executors {
-		log.Println("Start register executor: " + executor)
-		ExecutorList = append(ExecutorList, Executor{ Host: executor })
-	}
 
 	router := mux.NewRouter()
 	router.HandleFunc("/register-executor", RegisterExecutor).Methods("POST")
